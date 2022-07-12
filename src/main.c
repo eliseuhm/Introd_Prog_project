@@ -34,6 +34,20 @@ int main(void)
     //menu da agenda
     agenda.menu = TELA_PRINCIPAL;
 
+    FILE * memoria = fopen("contatos.bin", "rb");
+    if (memoria == NULL)
+    {
+        printf("Erro ao abrir arquivo de memoria de contatos.\n");
+        printf("Voce deve criar o arquivo 'contatos.bin' na primeira execucao\n");
+        return 1;
+    }
+
+    size_t lidos = fread(agenda.contatos, sizeof(Contato),
+                         MAX_CONTATOS, memoria);
+    printf("Lidos %zd contatos\n", lidos);
+    agenda.totalContatos = (int)lidos;
+    fclose(memoria);
+
     while (agenda.menu != TELA_SAIR)
     {
         switch (agenda.menu)
@@ -105,6 +119,17 @@ int main(void)
                 break;
             case TELA_LISTAR_TODOS:
                 {
+                    printf("---------------------------------\n");
+                    printf("\tLISTANDO CONTATOS:\n");
+                    printf("---------------------------------\n");
+                    int i;
+                    for (i = 0; i < agenda.totalContatos; i++)
+                    {
+                        printf("Contato %d\n", i);
+                        printf("\tNome: %s\n", agenda.contatos[i].nome);
+                        printf("\tTelefone: %s\n", agenda.contatos[i].telefone);
+                        printf("--------------------------------------------------\n");
+                    }
                     //volta para tela principal
                     agenda.menu = TELA_PRINCIPAL;
                 }
