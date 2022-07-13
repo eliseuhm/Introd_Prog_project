@@ -107,12 +107,103 @@ int main(void)
 
             case TELA_CADASTRAR:
                 {
+                    printf("------------------------------------\n");
+                    printf("\tTELA DE CADASTRO:\n");
+                    printf("------------------------------------\n");
+                    Contato novo;
+                    char opcao = 's';
+                    printf("Voce deseja inserir um novo contato? Enter para continuar\n");
+                    int c = 0;
+                    while ((c = getchar()) != '\n' && c != EOF) {}
+
+                    do
+                    {
+                        memset(&novo, 0x0, sizeof(novo));
+                        printf("Digite um novo nome para o contato: \n");
+                        fgets(novo.nome, 128, stdin);
+                        int id = 0;
+                        while (novo.nome[id] != '\0' && novo.nome[id] != '\n')
+                            id++;
+                        novo.nome[id] = '\0';
+                        printf("Digite um novo telefone para o contato:\n");
+                        fgets(novo.telefone, 64, stdin);
+                        id = 0;
+                        while (novo.telefone[id] != '\0' && novo.telefone[id] != '\n')
+                            id++;
+                        novo.telefone[id] = '\0';
+                        printf("Tem certeza que quer adicionar este contato? [s/n]\n");
+                        opcao = getchar();
+                        int c = 0;
+                        while ((c = getchar()) != '\n' && c != EOF) {}
+                    } while (opcao == '\n' || opcao == 'N');
+
+                    agenda.contatos[agenda.totalContatos] = novo;
+                    agenda.totalContatos++;
+                    memoria = fopen("contatos.bin", "w+b");
+                    if (memoria == NULL)
+                    {
+                        printf("erro ao abrir contatos.bin\n");
+                        return 0;
+                    }
+
+                    size_t salvos =  fwrite(agenda.contatos, sizeof(Contato),
+                                            agenda.totalContatos, memoria);
+                    if (salvos != (size_t)agenda.totalContatos)
+                    {
+                        printf("Erro ao salvar contatos na memoria contatos.bin\n");
+                        return 1;
+                    }
+                    fclose(memoria);
+
                     //volta para tela principal
                     agenda.menu = TELA_PRINCIPAL;
                 }
                 break;
             case TELA_DESCADASTRAR:
                 {
+                    printf("----------------------------------------\n");
+                    printf("\tTELA DE DESCADASTRAR:\n");
+                    printf("----------------------------------------\n");
+                    int i;
+
+                    for (i = 0; i < agenda.totalContatos; i++)
+                    {
+                        printf("Contato %d\n", i);
+                        printf("\tNome: %s\n", agenda.contatos[i].nome);
+                        printf("\tTelefone: %s\n", agenda.contatos[i].telefone);
+                        printf("-----------------------------------------------------------\n");
+                    }
+                    int indice = -1;
+                    do
+                    {
+                        printf("Digite um indice de contato para descadastrar: de 0 até %d\n", agenda.totalContatos-1);
+                        scanf("%d", &indice);
+
+                        //Limpa o buffer para evitar problemas
+                        int c = 0;
+                        while ((c = getchar()) != '\n' && c != EOF) {}
+                    } while (indice < 0 || indice >= agenda.totalContatos);
+
+                    for (i = indice; i < agenda.totalContatos - 1; i++)
+                        agenda.contatos[i] = agenda.contatos[i + 1];
+
+                    agenda.totalContatos--;
+
+                    memoria = fopen("contatos.bin", "w+b");
+                    if (memoria == NULL)
+                    {
+                        printf("erro ao abrir contatos.bin\n");
+                        return 0;
+                    }
+                    size_t salvos = fwrite(agenda.contatos, sizeof(Contato),
+                                           agenda.totalContatos, memoria);
+                    if (salvos != (size_t)agenda.totalContatos)
+                    {
+                        printf("Erro ao salvar contatos na memoria contatos.bin\n");
+                        return 1;
+                    }
+                    fclose(memoria);
+
                     //volta para tela principal
                     agenda.menu = TELA_PRINCIPAL;
                 }
